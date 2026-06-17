@@ -1,6 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import { useMemo } from 'react'
 
 import { clsxm } from '~/lib/helper'
 
@@ -15,7 +16,13 @@ export const Loading: Component<LoadingProps> = ({
   useDefaultLoadingText = false,
 }) => {
   const t = useTranslations('common')
-  const defaultLoadingText = t('loading_default')
+  const defaultLoadingText = useMemo(() => {
+    const message = t.raw('loading_default')
+    if (Array.isArray(message)) {
+      return message[Math.floor(Math.random() * message.length)]
+    }
+    return message
+  }, [t])
   const nextLoadingText = useDefaultLoadingText
     ? defaultLoadingText
     : loadingText

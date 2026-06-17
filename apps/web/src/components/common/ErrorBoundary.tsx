@@ -10,8 +10,8 @@ const FallbackComponent = () => (
   <div className="center flex w-full flex-col py-6">
     <p>
       客户端组件渲染时报错，请尝试刷新页面，如果多次出现错误请联系开发者
-      <a href="mailto:i@innei.in" className="shiro-link--underline">
-        i@innei.in
+      <a href="mailto:suchen@chiran.top" className="shiro-link--underline">
+        suchen@chiran.top
       </a>
       .
     </p>
