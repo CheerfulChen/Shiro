@@ -49,13 +49,21 @@ export default definePrerenderPage<Props>()({
 
     // 如果指定了 lang=original，不传 lang 参数
     const preferredLang = lang === 'original' ? undefined : lang || locale
-
-    return await apiClient.post.getList(currentPage, currentSize, {
-      sortBy: sortBy as any,
-      sortOrder: orderBy === 'desc' ? -1 : 1,
-      truncate: 310,
-      lang: preferredLang,
-    })
+    try {
+      return await apiClient.post.getList(currentPage, currentSize, {
+        sortBy: sortBy as any,
+        sortOrder: orderBy === 'desc' ? -1 : 1,
+        truncate: 310,
+        lang: preferredLang,
+      })
+    } catch (error) {
+      if (!preferredLang) throw error
+      return await apiClient.post.getList(currentPage, currentSize, {
+        sortBy: sortBy as any,
+        sortOrder: orderBy === 'desc' ? -1 : 1,
+        truncate: 310,
+      })
+    }
   },
   Component: async (props) => {
     const { params, fetchedAt } = props

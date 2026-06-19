@@ -33,12 +33,21 @@ export const PostLoadMore: FC<{ pagination: Pager }> = ({ pagination }) => {
       initialPageParam.currentPage,
     ],
     queryFn: async ({ pageParam }) => {
-      return await apiClient.post.getList(pageParam, 10, {
-        sortBy: sortBy as any,
-        sortOrder: orderBy === 'desc' ? -1 : 1,
-        truncate: 310,
-        lang: preferredLang,
-      })
+      try {
+        return await apiClient.post.getList(pageParam, 10, {
+          sortBy: sortBy as any,
+          sortOrder: orderBy === 'desc' ? -1 : 1,
+          truncate: 310,
+          lang: preferredLang,
+        })
+      } catch (error) {
+        if (!preferredLang) throw error
+        return await apiClient.post.getList(pageParam, 10, {
+          sortBy: sortBy as any,
+          sortOrder: orderBy === 'desc' ? -1 : 1,
+          truncate: 310,
+        })
+      }
     },
     initialPageParam: initialPageParam.currentPage + 1,
     getNextPageParam: (lastPage) =>
