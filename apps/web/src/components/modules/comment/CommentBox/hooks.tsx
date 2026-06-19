@@ -1,7 +1,7 @@
 'use client'
 
 import type {
-  CommentDto,
+  AnonymousCommentDto,
   CommentModel,
   RequestError,
 } from '@mx-space/api-client'
@@ -76,6 +76,10 @@ export const useCommentBoxTextIsOversize = () =>
     ),
   )
 type CommentContextValue = ReturnType<typeof createInitialValue>
+type ShiroAnonymousCommentDto = AnonymousCommentDto & {
+  anchor?: CommentAnchor
+  source?: unknown
+}
 
 export const useSetCommentBoxValues = <
   T extends keyof CommentContextValue,
@@ -146,7 +150,7 @@ export const useSendComment = () => {
       const url = jotaiStore.get(urlAtom)
       const anchor = jotaiStore.get(anchorAtom)
 
-      const commentDto: CommentDto & { anchor?: CommentAnchor } = {
+      const commentDto: ShiroAnonymousCommentDto = {
         text,
         author,
         mail,
@@ -180,7 +184,7 @@ export const useSendComment = () => {
             .then(wrappedCompletedCallback)
         } else {
           return apiClient.comment
-            .reply(refId, commentDto)
+            .guestReply(refId, commentDto)
             .then(wrappedCompletedCallback)
         }
       }
@@ -215,7 +219,7 @@ export const useSendComment = () => {
       // @ts-ignore
       commentDto.isWhispers = isWhisper
       return apiClient.comment
-        .comment(refId, commentDto)
+        .guestComment(refId, commentDto)
         .then(wrappedCompletedCallback)
     },
     mutationKey: [commentRefId, 'comment'],

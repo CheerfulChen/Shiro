@@ -12,6 +12,7 @@ import type { CommentAnchor } from './types'
 export type CommentWithAnchor = CommentModel & {
   anchor?: CommentAnchor
   new?: boolean
+  source?: string
 }
 
 export type CommentThreadViewItem = CommentWithAnchor & {
