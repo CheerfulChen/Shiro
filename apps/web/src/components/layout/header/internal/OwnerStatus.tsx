@@ -178,7 +178,7 @@ const SettingStatusModalContent = () => {
     const currentValues = formRef.current.getCurrentValues()
     setIsLoading(true)
 
-    await apiClient.proxy.fn.shiro.status
+    await apiClient.serverless.proxy.shiro.status
       .post({
         data: {
           ...currentValues,
@@ -202,7 +202,7 @@ const SettingStatusModalContent = () => {
 
   const handleReset = useCallback(async () => {
     setIsLoading(true)
-    await apiClient.proxy.fn.shiro.status.delete().finally(() => {
+    await apiClient.serverless.proxy.shiro.status.delete().finally(() => {
       setIsLoading(false)
     })
     toast.success(t('status_set_success'))
