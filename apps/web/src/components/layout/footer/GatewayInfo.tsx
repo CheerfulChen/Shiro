@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 
-import { useOnlineCount } from '~/atoms'
+import { setOnlineCount, useOnlineCount } from '~/atoms'
 import { useSocketIsConnect } from '~/atoms/hooks/socket'
 import { ImpressionView } from '~/components/common/ImpressionTracker'
 import { PeekLink } from '~/components/modules/peek/PeekLink'
@@ -85,6 +85,20 @@ export const GatewayInfo = () => {
   const t = useTranslations('gateway')
   const isActive = usePageIsActive()
   const count = useOnlineCount()
+  useQuery({
+    queryKey: ['online-count'],
+    enabled: isActive,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 1000 * 10,
+    queryFn: async () => {
+      const data = await apiClient.activity.proxy['online-count'].get<{
+        total: number
+      }>()
+      setOnlineCount(data.total || 0)
+      return data
+    },
+  })
 
   if (!isActive) return null
   return (
