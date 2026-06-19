@@ -22,6 +22,37 @@ interface ActivityResponse {
   mediaInfo?: ActivityMediaInfo
 }
 
+const appIconMap: Record<string, string> = {
+  Arc: 'arc',
+  Chrome: 'chrome',
+  'Google Chrome': 'chrome',
+  'Chrome Canary': 'chrome_canary',
+  'Google Chrome Canary': 'chrome_canary',
+  Code: 'code',
+  'Visual Studio Code': 'code',
+  Cursor: 'code',
+  Discord: 'discord',
+  Figma: 'figma',
+  Finder: 'finder',
+  iTerm2: 'iterm2',
+  Linear: 'linear',
+  Mail: 'mail',
+  Music: 'music',
+  NetEaseMusic: 'netease',
+  NeteaseMusic: 'netease',
+  网易云音乐: 'netease',
+  QQ: 'qq',
+  QQMusic: 'qq_music',
+  QQ音乐: 'qq_music',
+  Safari: 'safari',
+  Slack: 'slack',
+  Telegram: 'telegram',
+  WebStorm: 'webstorm',
+  WeChat: 'wechat',
+  微信: 'wechat',
+  Xcode: 'xcode',
+}
+
 export const Activity = memo(() => {
   const activityConfig = useAppConfigSelector(
     (config) => config.module.activity,
@@ -91,8 +122,10 @@ const ActivityIndicator = () => {
     if (processInfo?.iconUrl) return processInfo.iconUrl
     if (processInfo?.iconBase64)
       return `data:image/png;base64,${processInfo.iconBase64}`
+    if (processName && appIconMap[processName])
+      return `/apps/${appIconMap[processName]}.png`
     return null
-  }, [processInfo?.iconBase64, processInfo?.iconUrl])
+  }, [processInfo?.iconBase64, processInfo?.iconUrl, processName])
 
   return (
     <>
