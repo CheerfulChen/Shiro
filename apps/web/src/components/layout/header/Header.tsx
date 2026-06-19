@@ -5,6 +5,7 @@ import { memo } from 'react'
 import { ErrorBoundary } from '~/components/common/ErrorBoundary'
 import { clsxm } from '~/lib/helper'
 
+import { Activity } from './internal/Activity'
 import { AnimatedLogo } from './internal/AnimatedLogo'
 import {
   HeaderCenterArea,
@@ -41,6 +42,7 @@ const MemoedHeader = memo(() => {
 
         <HeaderLogoArea>
           <AnimatedLogo />
+          <Activity />
         </HeaderLogoArea>
 
         <HeaderCenterArea>
