@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import type { Metadata } from 'next'
 
+import { ArticleRoomReporter } from '~/components/common/ArticleRoomReporter'
 import { CommentAreaRootLazy } from '~/components/modules/comment'
 import { TocFAB } from '~/components/modules/toc/TocFAB'
 import { TocHeadingStrategyProvider } from '~/components/modules/toc/TocHeadingStrategy'
@@ -77,6 +78,7 @@ export default definePrerenderPage<PageParams>()({
       contentFormat={data.contentFormat}
       hasContent={!!data.content}
     >
+      <ArticleRoomReporter id={data.id} />
       <CurrentPageDataProvider data={data} />
       <div className="relative flex min-h-[120px] w-full">
         <PageLoading>

@@ -135,42 +135,63 @@ const RoomsInfo = () => {
     queryFn: async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000))
       const res = await apiClient.activity.getRoomsInfo()
-      const data = res.$serialized
+      const data = (res as any).$serialized || res
+      const roomCount = data.roomCount || data.room_count || {}
+      const objects = {
+        notes: (data.objects?.notes || []) as {
+          id: string
+          nid: number
+          title: string
+        }[],
+        posts: (data.objects?.posts || []) as {
+          id: string
+          slug: string
+          title: string
+          category: { slug: string }
+        }[],
+        pages: (data.objects?.pages || []) as {
+          id: string
+          slug: string
+          title: string
+        }[],
+      }
       const result = [] as {
         path: string
         title: string
         count: number
       }[]
       const morphArticleIdToRoomName = (id: string) => `article_${id}`
-      data.objects.notes.forEach((note) => {
+      objects.notes.forEach((note) => {
         result.push({
           path: routeBuilder(Routes.Note, {
             id: note.nid,
           }),
           title: note.title,
-          count: data.roomCount[morphArticleIdToRoomName(note.id)],
+          count: roomCount[morphArticleIdToRoomName(note.id)] || 0,
         })
       })
-      data.objects.posts.forEach((post) => {
+      objects.posts.forEach((post) => {
         result.push({
           path: routeBuilder(Routes.Post, {
             category: post.category.slug,
             slug: post.slug,
           }),
           title: post.title,
-          count: data.roomCount[morphArticleIdToRoomName(post.id)],
+          count: roomCount[morphArticleIdToRoomName(post.id)] || 0,
         })
       })
-      data.objects.pages.forEach((page) => {
+      objects.pages.forEach((page) => {
         result.push({
           path: routeBuilder(Routes.Page, {
             slug: page.slug,
           }),
           title: page.title,
-          count: data.roomCount[morphArticleIdToRoomName(page.id)],
+          count: roomCount[morphArticleIdToRoomName(page.id)] || 0,
         })
       })
-      return result.sort((a, b) => b.count - a.count)
+      return result
+        .filter((room) => room.count > 0)
+        .sort((a, b) => b.count - a.count)
     },
   })
 
