@@ -134,8 +134,9 @@ const RoomsInfo = () => {
     staleTime: 1000 * 10,
     queryFn: async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000))
-      const res = await apiClient.activity.getRoomsInfo()
-      const data = (res as any).$serialized || res
+      const res = await fetch('/api/activity/rooms')
+      if (!res.ok) throw new Error('Failed to fetch activity rooms')
+      const data = await res.json()
       const roomCount = data.roomCount || data.room_count || {}
       const objects = {
         notes: (data.objects?.notes || []) as {
