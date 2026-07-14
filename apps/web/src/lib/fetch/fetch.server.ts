@@ -12,7 +12,7 @@ const isDev = process.env.NODE_ENV === 'development'
 
 export const $fetch = createFetch({
   defaults: {
-    timeout: 8000,
+    timeout: 30_000,
     credentials: 'include',
     async onRequest(context) {
       const cookie = await cookies()

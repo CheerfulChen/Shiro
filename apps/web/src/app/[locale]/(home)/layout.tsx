@@ -18,12 +18,20 @@ export default definePrerenderPage()({
   fetcher() {
     const queryClient = getQueryClient()
 
-    return queryClient
-      .fetchQuery({
-        queryKey,
-        queryFn: async () => (await apiClient.aggregate.getTop(5)).$serialized,
-      })
-      .catch(requestErrorHandler)
+    return queryClient.fetchQuery({
+      queryKey,
+      queryFn: async () => {
+        try {
+          return (await apiClient.aggregate.getTop(5)).$serialized
+        } catch (error) {
+          requestErrorHandler(error as any)
+          return {
+            posts: [],
+            notes: [],
+          }
+        }
+      },
+    })
   },
   async Component(props) {
     const queryClient = getQueryClient()
