@@ -8,5 +8,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/login/', '/preview/', '/dashboard', '/_next'],
       },
     ],
+    sitemap: 'https://blog.chiran.top/sitemap.xml',
   }
 }
