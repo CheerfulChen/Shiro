@@ -17,5 +17,11 @@
   "route_projects": "プロジェクト",
   "route_says": "ひとこと",
   "route_thinking": "思考",
-  "route_other": "ページ：{path}"
+  "route_other": "その他のページ",
+  "content_post": "記事",
+  "content_note": "ノート",
+  "content_page": "ページ",
+  "content_thinking": "思考",
+  "content_project": "プロジェクト",
+  "content_title": "{category} · {title}"
 }

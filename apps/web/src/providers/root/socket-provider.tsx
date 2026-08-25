@@ -1,7 +1,7 @@
 'use client'
 
 import { useLocale } from 'next-intl'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { useSocketIsConnect, useSocketSessionId } from '~/atoms/hooks/socket'
 import { usePageIsActive } from '~/hooks/common/use-is-active'
@@ -45,16 +45,51 @@ const SocketContainerImpl: Component = () => {
   }, [socketIsConnected, locale])
 
   const pathname = usePathname()
+  const [pageMetadata, setPageMetadata] = useState({
+    pathname: '',
+    title: '',
+  })
+  useEffect(() => {
+    const updatePageMetadata = () => {
+      const documentTitle = document.title
+      const separatorIndex = documentTitle.lastIndexOf(' - ')
+      const title =
+        separatorIndex > 0
+          ? documentTitle.slice(0, separatorIndex)
+          : documentTitle
+
+      setPageMetadata((current) =>
+        current.pathname === pathname && current.title === title
+          ? current
+          : { pathname, title },
+      )
+    }
+
+    const animationFrame = requestAnimationFrame(updatePageMetadata)
+    const observer = new MutationObserver(updatePageMetadata)
+    observer.observe(document.head, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    })
+
+    return () => {
+      cancelAnimationFrame(animationFrame)
+      observer.disconnect()
+    }
+  }, [pathname])
+
   useEffect(() => {
     if (!socketIsConnected || !shouldReportPathname(pathname)) return
 
-    const roomName = pathnameToRoomName(pathname)
+    const title = pageMetadata.pathname === pathname ? pageMetadata.title : ''
+    const roomName = pathnameToRoomName(pathname, title)
     socketWorker.emit(SocketEmitEnum.Join, { roomName })
 
     return () => {
       socketWorker.emit(SocketEmitEnum.Leave, { roomName })
     }
-  }, [pathname, socketIsConnected])
+  }, [pageMetadata, pathname, socketIsConnected])
 
   const pageIsActive = usePageIsActive()
   useEffect(() => {

@@ -17,5 +17,11 @@
   "route_projects": "Projects",
   "route_says": "Says",
   "route_thinking": "Thinking",
-  "route_other": "Page: {path}"
+  "route_other": "Other page",
+  "content_post": "Post",
+  "content_note": "Note",
+  "content_page": "Page",
+  "content_thinking": "Thinking",
+  "content_project": "Project",
+  "content_title": "{category} · {title}"
 }

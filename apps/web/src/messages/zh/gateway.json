@@ -10,12 +10,18 @@
   "no_readers": "暂时还没有人在阅读内容",
   "popular_content": "大家正在阅读：",
   "route_home": "首页",
-  "route_posts": "文章列表",
-  "route_notes": "手记列表",
-  "route_timeline": "时间线",
+  "route_posts": "文稿",
+  "route_notes": "手记",
+  "route_timeline": "时光",
   "route_friends": "朋友们",
   "route_projects": "项目",
   "route_says": "一言",
   "route_thinking": "思考",
-  "route_other": "页面：{path}"
+  "route_other": "其他页面",
+  "content_post": "文稿",
+  "content_note": "手记",
+  "content_page": "独立页",
+  "content_thinking": "思考",
+  "content_project": "项目",
+  "content_title": "{category} · {title}"
 }

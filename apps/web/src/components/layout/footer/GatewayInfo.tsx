@@ -12,7 +12,7 @@ import { FloatPopover } from '~/components/ui/float-popover'
 import { NumberSmoothTransition } from '~/components/ui/number-transition/NumberSmoothTransition'
 import { TrackerAction } from '~/constants/tracker'
 import { usePageIsActive } from '~/hooks/common/use-is-active'
-import { roomNameToPathname } from '~/lib/activity-room'
+import { roomNameToRouteInfo } from '~/lib/activity-room'
 import { apiClient } from '~/lib/request'
 import { routeBuilder, Routes } from '~/lib/route-builder'
 
@@ -160,7 +160,7 @@ const RoomsInfo = () => {
       }
       const result = [] as {
         path: string
-        title: string
+        label: string
         count: number
       }[]
       const morphArticleIdToRoomName = (id: string) => `article_${id}`
@@ -169,7 +169,7 @@ const RoomsInfo = () => {
           path: routeBuilder(Routes.Note, {
             id: note.nid,
           }),
-          title: note.title,
+          label: formatContentLabel(t('content_note'), note.title, t),
           count: roomCount[morphArticleIdToRoomName(note.id)] || 0,
         })
       })
@@ -179,7 +179,7 @@ const RoomsInfo = () => {
             category: post.category.slug,
             slug: post.slug,
           }),
-          title: post.title,
+          label: formatContentLabel(t('content_post'), post.title, t),
           count: roomCount[morphArticleIdToRoomName(post.id)] || 0,
         })
       })
@@ -188,21 +188,43 @@ const RoomsInfo = () => {
           path: routeBuilder(Routes.Page, {
             slug: page.slug,
           }),
-          title: page.title,
+          label: formatContentLabel(t('content_page'), page.title, t),
           count: roomCount[morphArticleIdToRoomName(page.id)] || 0,
         })
       })
 
-      const contentPaths = new Set(result.map((room) => room.path))
+      const routeResults = new Map<
+        string,
+        { path: string; label: string; count: number; hasTitle: boolean }
+      >()
       rooms.forEach((roomName) => {
-        const path = roomNameToPathname(roomName)
-        if (!path || contentPaths.has(path)) return
+        const route = roomNameToRouteInfo(roomName)
+        if (!route) return
 
-        result.push({
-          path,
-          title: getRouteTitle(path, t),
-          count: roomCount[roomName] || 0,
-        })
+        const current = routeResults.get(route.path)
+        const hasTitle = !!route.title
+        const routeResult = {
+          path: route.path,
+          label: getRouteLabel(route.path, route.title, t),
+          count: (current?.count || 0) + (roomCount[roomName] || 0),
+          hasTitle,
+        }
+
+        if (!current || hasTitle || !current.hasTitle) {
+          routeResults.set(route.path, routeResult)
+        } else {
+          current.count = routeResult.count
+        }
+      })
+
+      routeResults.forEach((route) => {
+        const contentRoom = result.find((room) => room.path === route.path)
+        if (contentRoom) {
+          contentRoom.count = Math.max(contentRoom.count, route.count)
+          return
+        }
+
+        result.push(route)
       })
 
       return result
@@ -226,7 +248,7 @@ const RoomsInfo = () => {
         {data.map((room) => (
           <li key={room.path} className="flex items-center justify-between">
             <PeekLink href={room.path} className="hover:underline">
-              {room.title}
+              {room.label}
             </PeekLink>
             {!!room.count && (
               <span className="ml-5 inline-flex items-center text-sm text-zinc-500">
@@ -240,8 +262,15 @@ const RoomsInfo = () => {
   )
 }
 
-const getRouteTitle = (
+const formatContentLabel = (
+  category: string,
+  title: string | undefined,
+  t: ReturnType<typeof useTranslations<'gateway'>>,
+) => (title ? t('content_title', { category, title }) : category)
+
+const getRouteLabel = (
   path: string,
+  title: string | undefined,
   t: ReturnType<typeof useTranslations<'gateway'>>,
 ) => {
   if (path === '/') return t('route_home')
@@ -253,5 +282,16 @@ const getRouteTitle = (
   if (path === Routes.Says) return t('route_says')
   if (path === Routes.Thinking) return t('route_thinking')
 
-  return t('route_other', { path })
+  if (path.startsWith(`${Routes.Posts}/`))
+    return formatContentLabel(t('content_post'), title, t)
+  if (path.startsWith(`${Routes.Notes}/`))
+    return formatContentLabel(t('content_note'), title, t)
+  if (path.startsWith(`${Routes.Thinking}/`))
+    return formatContentLabel(t('content_thinking'), title, t)
+  if (path.startsWith(`${Routes.Projects}/`))
+    return formatContentLabel(t('content_project'), title, t)
+
+  return title
+    ? formatContentLabel(t('content_page'), title, t)
+    : t('route_other')
 }
