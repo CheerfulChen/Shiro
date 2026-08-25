@@ -12,6 +12,7 @@ import { FloatPopover } from '~/components/ui/float-popover'
 import { NumberSmoothTransition } from '~/components/ui/number-transition/NumberSmoothTransition'
 import { TrackerAction } from '~/constants/tracker'
 import { usePageIsActive } from '~/hooks/common/use-is-active'
+import { roomNameToPathname } from '~/lib/activity-room'
 import { apiClient } from '~/lib/request'
 import { routeBuilder, Routes } from '~/lib/route-builder'
 
@@ -138,6 +139,7 @@ const RoomsInfo = () => {
       if (!res.ok) throw new Error('Failed to fetch activity rooms')
       const data = await res.json()
       const roomCount = data.roomCount || data.room_count || {}
+      const rooms = (data.rooms || []) as string[]
       const objects = {
         notes: (data.objects?.notes || []) as {
           id: string
@@ -190,6 +192,19 @@ const RoomsInfo = () => {
           count: roomCount[morphArticleIdToRoomName(page.id)] || 0,
         })
       })
+
+      const contentPaths = new Set(result.map((room) => room.path))
+      rooms.forEach((roomName) => {
+        const path = roomNameToPathname(roomName)
+        if (!path || contentPaths.has(path)) return
+
+        result.push({
+          path,
+          title: getRouteTitle(path, t),
+          count: roomCount[roomName] || 0,
+        })
+      })
+
       return result
         .filter((room) => room.count > 0)
         .sort((a, b) => b.count - a.count)
@@ -223,4 +238,20 @@ const RoomsInfo = () => {
       </ul>
     </div>
   )
+}
+
+const getRouteTitle = (
+  path: string,
+  t: ReturnType<typeof useTranslations<'gateway'>>,
+) => {
+  if (path === '/') return t('route_home')
+  if (path === Routes.Posts) return t('route_posts')
+  if (path === Routes.Notes) return t('route_notes')
+  if (path === Routes.Timelime) return t('route_timeline')
+  if (path === Routes.Friends) return t('route_friends')
+  if (path === Routes.Projects) return t('route_projects')
+  if (path === Routes.Says) return t('route_says')
+  if (path === Routes.Thinking) return t('route_thinking')
+
+  return t('route_other', { path })
 }

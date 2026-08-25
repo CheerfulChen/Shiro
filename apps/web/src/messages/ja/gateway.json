@@ -8,5 +8,14 @@
   "being_viewed": "現在 ",
   "viewers": " 人が見ています",
   "no_readers": "まだ誰も読んでいませんよ〜",
-  "popular_content": "いま読まれている内容："
+  "popular_content": "みんなが読んでいるもの：",
+  "route_home": "ホーム",
+  "route_posts": "記事一覧",
+  "route_notes": "ノート一覧",
+  "route_timeline": "タイムライン",
+  "route_friends": "友達",
+  "route_projects": "プロジェクト",
+  "route_says": "ひとこと",
+  "route_thinking": "思考",
+  "route_other": "ページ：{path}"
 }

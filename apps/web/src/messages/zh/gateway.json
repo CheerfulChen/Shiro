@@ -5,8 +5,17 @@
   "socket_status": "当前 Socket 状态：",
   "connected": "已连接",
   "disconnected": "未连接",
-  "being_viewed": "正在被",
-  "viewers": "人看爆",
-  "no_readers": "还没有小伙伴在阅览文章哦~",
-  "popular_content": "下面的内容正在被看爆："
+  "being_viewed": "当前有 ",
+  "viewers": " 人阅读",
+  "no_readers": "暂时还没有人在阅读内容",
+  "popular_content": "大家正在阅读：",
+  "route_home": "首页",
+  "route_posts": "文章列表",
+  "route_notes": "手记列表",
+  "route_timeline": "时间线",
+  "route_friends": "朋友们",
+  "route_projects": "项目",
+  "route_says": "一言",
+  "route_thinking": "思考",
+  "route_other": "页面：{path}"
 }

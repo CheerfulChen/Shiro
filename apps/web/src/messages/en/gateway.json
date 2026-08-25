@@ -8,5 +8,14 @@
   "being_viewed": "Currently viewed by ",
   "viewers": " people",
   "no_readers": "Nobody is reading anything right now~",
-  "popular_content": "The following content is getting a lot of attention:"
+  "popular_content": "People are reading:",
+  "route_home": "Home",
+  "route_posts": "Posts",
+  "route_notes": "Notes",
+  "route_timeline": "Timeline",
+  "route_friends": "Friends",
+  "route_projects": "Projects",
+  "route_says": "Says",
+  "route_thinking": "Thinking",
+  "route_other": "Page: {path}"
 }

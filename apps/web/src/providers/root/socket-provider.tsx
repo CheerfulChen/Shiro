@@ -6,7 +6,8 @@ import { useEffect, useRef } from 'react'
 import { useSocketIsConnect, useSocketSessionId } from '~/atoms/hooks/socket'
 import { usePageIsActive } from '~/hooks/common/use-is-active'
 import { useIsClient } from '~/hooks/common/use-is-client'
-import { useRouter } from '~/i18n/navigation'
+import { usePathname, useRouter } from '~/i18n/navigation'
+import { pathnameToRoomName, shouldReportPathname } from '~/lib/activity-room'
 import { SocketEmitEnum } from '~/types/events'
 
 import { socketWorker } from '../../socket/worker-client'
@@ -42,6 +43,18 @@ const SocketContainerImpl: Component = () => {
     if (!socketIsConnected) return
     socketWorker.emit(SocketEmitEnum.UpdateLang, { lang: locale })
   }, [socketIsConnected, locale])
+
+  const pathname = usePathname()
+  useEffect(() => {
+    if (!socketIsConnected || !shouldReportPathname(pathname)) return
+
+    const roomName = pathnameToRoomName(pathname)
+    socketWorker.emit(SocketEmitEnum.Join, { roomName })
+
+    return () => {
+      socketWorker.emit(SocketEmitEnum.Leave, { roomName })
+    }
+  }, [pathname, socketIsConnected])
 
   const pageIsActive = usePageIsActive()
   useEffect(() => {
