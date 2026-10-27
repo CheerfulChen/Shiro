@@ -9,6 +9,7 @@ import type { ActivityMediaInfo, ActivityProcessInfo } from '~/atoms/activity'
 import { useActivity } from '~/atoms/hooks/activity'
 import { FloatPopover } from '~/components/ui/float-popover'
 import { softBouncePreset } from '~/constants/spring'
+import installedAppIconMap from '~/data/app-icons.generated.json'
 import { usePageIsActive } from '~/hooks/common/use-is-active'
 import { apiClient } from '~/lib/request'
 import {
@@ -22,7 +23,7 @@ interface ActivityResponse {
   mediaInfo?: ActivityMediaInfo
 }
 
-const appIconMap: Record<string, string> = {
+const legacyAppIconMap: Record<string, string> = {
   Arc: 'arc',
   Chrome: 'chrome',
   'Google Chrome': 'chrome',
@@ -52,6 +53,18 @@ const appIconMap: Record<string, string> = {
   微信: 'wechat',
   Xcode: 'xcode',
 }
+
+const appIconMap: Record<string, string> = {
+  ...legacyAppIconMap,
+  ...installedAppIconMap,
+}
+
+const normalizedAppIconMap = Object.fromEntries(
+  Object.entries(appIconMap).map(([name, icon]) => [
+    name.toLocaleLowerCase(),
+    icon,
+  ]),
+)
 
 export const Activity = memo(() => {
   const activityConfig = useAppConfigSelector(
@@ -122,8 +135,11 @@ const ActivityIndicator = () => {
     if (processInfo?.iconUrl) return processInfo.iconUrl
     if (processInfo?.iconBase64)
       return `data:image/png;base64,${processInfo.iconBase64}`
-    if (processName && appIconMap[processName])
-      return `/apps/${appIconMap[processName]}.png`
+    const appIcon = processName
+      ? appIconMap[processName] ||
+        normalizedAppIconMap[processName.trim().toLocaleLowerCase()]
+      : null
+    if (appIcon) return `/apps/${appIcon}.png`
     return null
   }, [processInfo?.iconBase64, processInfo?.iconUrl, processName])
 
