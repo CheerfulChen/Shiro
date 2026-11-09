@@ -11,6 +11,11 @@ export const HREFLANG_BY_LOCALE: Record<Locale, string> = {
   ja: 'ja',
 }
 
+export const normalizeLocale = (code?: string | null): Locale | undefined => {
+  const language = code?.toLowerCase().split(/[-_]/)[0]
+  return locales.find((locale) => locale === language)
+}
+
 export const buildLocalePrefixedPath = (locale: Locale, pathname: string) => {
   const normalized = pathname.startsWith('/') ? pathname : `/${pathname}`
   return locale === defaultLocale ? normalized : `/${locale}${normalized}`
@@ -37,8 +42,8 @@ export const getSupportedLocalesFromTranslations = (input?: {
   const set = new Set<Locale>()
 
   const addIfSupported = (code?: string | null) => {
-    if (!code) return
-    if (supported.has(code)) set.add(code as Locale)
+    const locale = normalizeLocale(code)
+    if (locale && supported.has(locale)) set.add(locale)
   }
 
   addIfSupported(input?.sourceLang ?? defaultLocale)
@@ -46,6 +51,51 @@ export const getSupportedLocalesFromTranslations = (input?: {
 
   // Keep deterministic order (matching `locales`)
   return locales.filter((l) => set.has(l))
+}
+
+export interface TranslatedContent {
+  isTranslated?: boolean
+  translationMeta?: {
+    sourceLang: string
+    targetLang: string
+  }
+  availableTranslations?: string[]
+}
+
+// A locale URL may return the original when no translation is available.
+// Canonicalize that fallback to the language of the returned content.
+export const getContentLanguages = (content: TranslatedContent) => {
+  const sourceLocale =
+    normalizeLocale(content.translationMeta?.sourceLang) ?? defaultLocale
+  const translatedLocale = content.isTranslated
+    ? normalizeLocale(content.translationMeta?.targetLang)
+    : undefined
+  const contentLocale = translatedLocale ?? sourceLocale
+  const supportedLocales = getSupportedLocalesFromTranslations({
+    sourceLang: sourceLocale,
+    availableTranslations: [
+      ...(content.availableTranslations ?? []),
+      ...(translatedLocale ? [translatedLocale] : []),
+    ],
+  })
+
+  return { sourceLocale, contentLocale, supportedLocales }
+}
+
+export const buildContentAlternates = (
+  pathname: string,
+  content: TranslatedContent,
+) => {
+  const { sourceLocale, contentLocale, supportedLocales } =
+    getContentLanguages(content)
+
+  return {
+    canonical: buildLocalePrefixedPath(contentLocale, pathname),
+    languages: {
+      ...buildLanguageAlternates(pathname, supportedLocales),
+      'x-default': buildLocalePrefixedPath(sourceLocale, pathname),
+    },
+  }
 }
 
 export const stripLocaleFromPathname = (pathname: string) => {

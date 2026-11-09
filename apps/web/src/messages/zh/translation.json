@@ -7,5 +7,7 @@
   "original_mode": "原文模式",
   "content_updated": "内容已更新，正在重新生成更好的翻译体验",
   "viewing_original": "当前正在查看原始内容",
-  "original": "原文"
+  "original": "原文",
+  "unavailable": "暂无{language}译文，当前显示{sourceLanguage}原文。",
+  "available_languages": "本文语言版本"
 }

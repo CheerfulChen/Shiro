@@ -38,27 +38,8 @@ function getLocaleFromPathname(pathname: string): string | undefined {
   return normalizeLocale(firstSegment)
 }
 
-function getLocaleFromRequest(req: NextRequest, pathname: string): string {
-  return (
-    getLocaleFromPathname(pathname) ||
-    normalizeLocale(req.headers.get(NEXT_INTL_LOCALE_HEADER)) ||
-    normalizeLocale(req.cookies.get('NEXT_LOCALE')?.value) ||
-    (() => {
-      const acceptLanguage = req.headers.get('accept-language')
-      if (!acceptLanguage) return
-      // e.g. "ja,en-US;q=0.9,en;q=0.8"
-      const tags = acceptLanguage
-        .split(',')
-        .map((part) => part.trim().split(';')[0])
-        .filter(Boolean)
-      for (const tag of tags) {
-        const normalized = normalizeLocale(tag)
-        if (normalized) return normalized
-      }
-      return
-    })() ||
-    defaultLocale
-  )
+function getLocaleFromRequest(pathname: string): string {
+  return getLocaleFromPathname(pathname) || defaultLocale
 }
 
 function getLocaleFromIntlResponseHeaders(
@@ -158,7 +139,7 @@ export async function proxy(req: NextRequest) {
     requestHeaders.set(
       REQUEST_LOCALE,
       getLocaleFromIntlResponseHeaders(intlResponse.headers) ||
-        getLocaleFromRequest(req, pathname),
+        getLocaleFromRequest(pathname),
     )
 
     // Handle redirects
@@ -189,7 +170,7 @@ export async function proxy(req: NextRequest) {
   }
 
   // Routes that skip next-intl still benefit from having a stable locale header.
-  requestHeaders.set(REQUEST_LOCALE, getLocaleFromRequest(req, pathname))
+  requestHeaders.set(REQUEST_LOCALE, getLocaleFromRequest(pathname))
 
   return NextResponse.next({
     request: {

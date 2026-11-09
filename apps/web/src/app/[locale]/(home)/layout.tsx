@@ -10,16 +10,16 @@ import { ActivityScreen } from './components/ActivityScreen'
 import { Hero } from './components/Hero'
 import { HomePageTimeLine } from './components/HomePageTimeLine'
 import { Windsock } from './components/Windsock'
-import { queryKey } from './query'
+import { getHomeQueryKey } from './query'
 
 export const dynamic = 'force-dynamic'
 
-export default definePrerenderPage()({
-  fetcher() {
+export default definePrerenderPage<{ locale: string }>()({
+  fetcher({ locale }) {
     const queryClient = getQueryClient()
 
     return queryClient.fetchQuery({
-      queryKey,
+      queryKey: getHomeQueryKey(locale),
       queryFn: async () => {
         try {
           return (await apiClient.aggregate.getTop(5)).$serialized
@@ -35,6 +35,7 @@ export default definePrerenderPage()({
   },
   async Component(props) {
     const queryClient = getQueryClient()
+    const queryKey = getHomeQueryKey(props.params.locale)
 
     const dehydrateState = dehydrate(queryClient, {
       shouldDehydrateQuery(query) {

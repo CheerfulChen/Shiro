@@ -241,5 +241,6 @@
 
   "error_boundary_block_title": "エラーが発生しました",
   "error_boundary_block_subtitle": "ページを更新してください",
-  "error_boundary_inline_text": "コンポーネントの描画に失敗しました"
+  "error_boundary_inline_text": "コンポーネントの描画に失敗しました",
+  "site_language": "サイトの言語"
 }

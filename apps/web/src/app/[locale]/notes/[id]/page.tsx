@@ -27,6 +27,7 @@ import {
 import { NoteFontSettingFab } from '~/components/modules/note/NoteFontFab'
 import { NoteMainContainer } from '~/components/modules/note/NoteMainContainer'
 import { BanCopyWrapper } from '~/components/modules/shared/BanCopyWrapper'
+import { ContentLanguageNotice } from '~/components/modules/shared/ContentLanguageNotice'
 import { ReadIndicatorForMobile } from '~/components/modules/shared/ReadIndicator'
 import { TocFAB } from '~/components/modules/toc/TocFAB'
 import { TocHeadingStrategyProvider } from '~/components/modules/toc/TocHeadingStrategy'
@@ -35,11 +36,7 @@ import { OnlyMobile } from '~/components/ui/viewport/OnlyMobile'
 import { getOgUrl } from '~/lib/helper.server'
 import { getSummaryFromMd } from '~/lib/markdown'
 import { definePrerenderPage } from '~/lib/request.server'
-import {
-  buildLanguageAlternates,
-  buildLocalePrefixedPath,
-  getSupportedLocalesFromTranslations,
-} from '~/lib/seo/hreflang'
+import { buildContentAlternates } from '~/lib/seo/hreflang'
 import {
   CurrentNoteDataProvider,
   SyncNoteDataAfterLoggedIn,
@@ -71,9 +68,13 @@ export const dynamic = 'force-dynamic'
 function PageInner({
   data,
   privateLoginOnlyMessage,
+  locale,
+  requestedLanguage,
 }: {
   data: NoteWithTranslation
   privateLoginOnlyMessage: string
+  locale: string
+  requestedLanguage?: string
 }) {
   return (
     <>
@@ -97,6 +98,12 @@ function PageInner({
       </div>
 
       <NoteHideIfSecret>
+        <ContentLanguageNotice
+          content={data}
+          pathname={`/notes/${data.nid}`}
+          locale={locale}
+          requestedLanguage={requestedLanguage}
+        />
         <WrappedElementProvider eoaDetect>
           <ReadIndicatorForMobile />
           <NoteMarkdownImageRecordProvider>
@@ -133,6 +140,7 @@ function PageInner({
 type NoteDetailPageParams = LocaleParams & {
   id: string
   password?: string
+  lang?: string
 }
 export const generateMetadata = async (props: {
   params: Promise<NoteDetailPageParams>
@@ -165,14 +173,6 @@ export const generateMetadata = async (props: {
     )
 
     const canonicalPathNoLocale = `/notes/${params.id}`
-    const canonicalPath = buildLocalePrefixedPath(
-      params.locale as any,
-      canonicalPathNoLocale,
-    )
-    const supportedLocales = getSupportedLocalesFromTranslations({
-      sourceLang: (data as any).translationMeta?.sourceLang,
-      availableTranslations: (data as any).availableTranslations,
-    })
 
     return {
       title: data.title,
@@ -189,13 +189,7 @@ export const generateMetadata = async (props: {
         description,
         card: 'summary_large_image',
       },
-      alternates: {
-        canonical: canonicalPath,
-        languages: {
-          ...buildLanguageAlternates(canonicalPathNoLocale, supportedLocales),
-          'x-default': canonicalPathNoLocale,
-        },
-      },
+      alternates: buildContentAlternates(canonicalPathNoLocale, data),
     } satisfies Metadata
   } catch {
     return {}
@@ -218,7 +212,7 @@ export default definePrerenderPage<NoteDetailPageParams>()<NoteDataResult>({
   },
   async Component({
     data: fetchedData,
-    params: { id: nid, locale },
+    params: { id: nid, locale, lang },
     fetchedAt,
   }) {
     const { note: data } = fetchedData
@@ -240,6 +234,8 @@ export default definePrerenderPage<NoteDetailPageParams>()<NoteDataResult>({
           <Paper key={nid} as={NoteMainContainer}>
             <PageInner
               data={data.data}
+              locale={locale}
+              requestedLanguage={lang}
               privateLoginOnlyMessage={t('private_login_only')}
             />
           </Paper>

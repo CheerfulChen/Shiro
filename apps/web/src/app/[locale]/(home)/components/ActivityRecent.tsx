@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { m } from 'motion/react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useMemo } from 'react'
 
 import { ScrollArea } from '~/components/ui/scroll-area'
@@ -14,9 +14,10 @@ import { ActivityCard, iconClassName } from './ActivityCard'
 import type { ReactActivityType } from './types'
 
 export const ActivityRecent = () => {
+  const locale = useLocale()
   const t = useTranslations('home')
   const { data, isLoading } = useQuery({
-    queryKey: ['home-activity-recent'],
+    queryKey: ['home-activity-recent', locale],
     queryFn: async () =>
       (await apiClient.activity.getRecentActivities()).$serialized,
     refetchOnMount: true,

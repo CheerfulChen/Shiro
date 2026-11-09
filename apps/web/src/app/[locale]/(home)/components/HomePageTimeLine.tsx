@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { m } from 'motion/react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useInView } from 'react-intersection-observer'
 
@@ -95,9 +95,10 @@ function PhDotBold() {
 }
 
 export const HomePageTimeLine = () => {
+  const locale = useLocale()
   const t = useTranslations('home')
   const { data: yearData } = useQuery({
-    queryKey: ['home-timeline'],
+    queryKey: ['home-timeline', locale],
     queryFn: async () => apiClient.activity.getLastYearPublication(),
   })
 

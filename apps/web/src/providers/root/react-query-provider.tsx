@@ -28,15 +28,18 @@ const asyncStoragePersister = createAsyncStoragePersister({
   },
 })
 
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      refetchOnWindowFocus: false,
-      refetchIntervalInBackground: false,
+const createQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        refetchOnWindowFocus: false,
+        refetchIntervalInBackground: false,
+      },
     },
-  },
-})
+  })
+
+export const queryClient = createQueryClient()
 
 declare module '@tanstack/react-query' {
   interface Meta {
@@ -66,14 +69,16 @@ const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
     },
   },
 }
-export const ReactQueryProvider = ({ children }: PropsWithChildren) => (
-  <PersistQueryClientProvider
-    client={queryClient}
-    persistOptions={persistOptions}
-  >
-    {children}
-  </PersistQueryClientProvider>
-)
+export const ReactQueryProvider = ({ children }: PropsWithChildren) => {
+  const [client] = useState(() =>
+    isServerSide ? createQueryClient() : queryClient,
+  )
+  return (
+    <PersistQueryClientProvider client={client} persistOptions={persistOptions}>
+      {children}
+    </PersistQueryClientProvider>
+  )
+}
 
 export const getQueryClientForDashboard = () =>
   new QueryClient({

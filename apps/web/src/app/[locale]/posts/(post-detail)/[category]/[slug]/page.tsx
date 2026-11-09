@@ -13,6 +13,7 @@ import {
   PostOutdate,
   PostRelated,
 } from '~/components/modules/post'
+import { ContentLanguageNotice } from '~/components/modules/shared/ContentLanguageNotice'
 import { GoToAdminEditingButton } from '~/components/modules/shared/GoToAdminEditingButton'
 import { ReadIndicatorForMobile } from '~/components/modules/shared/ReadIndicator'
 import { TocFAB } from '~/components/modules/toc/TocFAB'
@@ -25,11 +26,7 @@ import { OnlyMobile } from '~/components/ui/viewport/OnlyMobile'
 import { getOgUrl } from '~/lib/helper.server'
 import { getSummaryFromMd } from '~/lib/markdown'
 import { definePrerenderPage } from '~/lib/request.server'
-import {
-  buildLanguageAlternates,
-  buildLocalePrefixedPath,
-  getSupportedLocalesFromTranslations,
-} from '~/lib/seo/hreflang'
+import { buildContentAlternates } from '~/lib/seo/hreflang'
 import { CurrentPostDataProvider } from '~/providers/post/CurrentPostDataProvider'
 import {
   LayoutRightSidePortal,
@@ -80,14 +77,6 @@ export const generateMetadata = async (props: {
     )
 
     const canonicalPathNoLocale = `/posts/${categorySlug}/${data.slug}`
-    const canonicalPath = buildLocalePrefixedPath(
-      params.locale as any,
-      canonicalPathNoLocale,
-    )
-    const supportedLocales = getSupportedLocalesFromTranslations({
-      sourceLang: data.translationMeta?.sourceLang,
-      availableTranslations: (data as any).availableTranslations,
-    })
 
     return {
       title: data.title,
@@ -106,20 +95,22 @@ export const generateMetadata = async (props: {
       },
       keywords: meta?.keywords,
       category: categorySlug,
-      alternates: {
-        canonical: canonicalPath,
-        languages: {
-          ...buildLanguageAlternates(canonicalPathNoLocale, supportedLocales),
-          'x-default': canonicalPathNoLocale,
-        },
-      },
+      alternates: buildContentAlternates(canonicalPathNoLocale, data),
     } satisfies Metadata
   } catch {
     return {}
   }
 }
 
-const PostPage = ({ data }: { data: PostWithTranslation }) => {
+const PostPage = ({
+  data,
+  locale,
+  requestedLanguage,
+}: {
+  data: PostWithTranslation
+  locale: string
+  requestedLanguage?: string
+}) => {
   const { id } = data
   return (
     <div className="relative w-full min-w-0">
@@ -135,6 +126,13 @@ const PostPage = ({ data }: { data: PostWithTranslation }) => {
           />
 
           <PostMetaBarInternal className="mb-8 justify-center" />
+
+          <ContentLanguageNotice
+            content={data}
+            pathname={`/posts/${data.category.slug}/${data.slug}`}
+            locale={locale}
+            requestedLanguage={requestedLanguage}
+          />
 
           <PostOutdate />
 
@@ -209,7 +207,11 @@ export default definePrerenderPage<PageParams>()<PostDataResult>({
           className="relative flex min-h-[120px] grid-cols-[auto_200px] lg:grid"
         >
           <BottomToUpTransitionView lcpOptimization className="min-w-0">
-            <PostPage data={data} />
+            <PostPage
+              data={data}
+              locale={params.locale}
+              requestedLanguage={params.lang}
+            />
 
             <BottomToUpSoftScaleTransitionView delay={500}>
               <CommentAreaRootLazy

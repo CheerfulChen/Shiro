@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid'
 import { createFetch } from 'ofetch'
 
 import PKG from '~/../package.json'
+import { defaultLocale, locales } from '~/i18n/config'
 
 import { createApiClient, createFetchAdapter } from './shared'
 
@@ -38,6 +39,13 @@ export const $fetch = createFetch({
         globalThis?.sessionStorage?.getItem(uuidStorageKey) ?? uuid
 
       context.options.params ??= {}
+      // Resolve from the URL at request time, including the first request after
+      // a language switch, before LangSyncProvider's effect has run.
+      if (!isServerSide) {
+        const prefix = window.location.pathname.split('/')[1]
+        headers['x-lang'] =
+          locales.find((locale) => locale === prefix) ?? defaultLocale
+      }
       Object.assign(context.options.params, globalConfigureSearchParams)
 
       if (isDev && isServerSide) {

@@ -248,5 +248,6 @@
 
   "error_boundary_block_title": "页面渲染出错",
   "error_boundary_block_subtitle": "请尝试刷新页面",
-  "error_boundary_inline_text": "组件渲染失败"
+  "error_boundary_inline_text": "组件渲染失败",
+  "site_language": "网站语言"
 }

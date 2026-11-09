@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
@@ -16,10 +16,16 @@ import { Root } from '~/components/layout/root/Root'
 import { AccentColorStyleInjector } from '~/components/modules/shared/AccentColorStyleInjector'
 import { SearchPanelWithHotKey } from '~/components/modules/shared/SearchFAB'
 import { TocAutoScroll } from '~/components/modules/toc/TocAutoScroll'
+import { REQUEST_PATHNAME } from '~/constants/system'
+import type { Locale } from '~/i18n/config'
 import { routing } from '~/i18n/routing'
 import { PreRenderError } from '~/lib/error-factory'
 import { sansFont, serifFont } from '~/lib/fonts'
 import { apiClient } from '~/lib/request'
+import {
+  buildLocalePrefixedPath,
+  stripLocaleFromPathname,
+} from '~/lib/seo/hreflang'
 import { AggregationProvider } from '~/providers/root/aggregation-data-provider'
 import { AppFeatureProvider } from '~/providers/root/app-feature-provider'
 import { HydrateuserAuthProvider } from '~/providers/root/hydrate-user-auth-provider'
@@ -54,6 +60,11 @@ export const generateMetadata = async ({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> => {
   const { locale } = await params
+  const pathname = (await headers()).get(REQUEST_PATHNAME) || '/'
+  const canonicalPath = buildLocalePrefixedPath(
+    locale as Locale,
+    stripLocaleFromPathname(pathname),
+  )
   const fetchedData = await fetchAggregationData()
 
   const {
@@ -131,7 +142,7 @@ export const generateMetadata = async ({
     },
 
     alternates: {
-      canonical: url.webUrl,
+      canonical: canonicalPath,
       types: {
         'application/rss+xml': [{ url: 'feed', title: 'RSS 订阅' }],
       },

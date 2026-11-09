@@ -7,5 +7,7 @@
   "original_mode": "Original mode",
   "content_updated": "The content has been updated. Regenerating the translation.",
   "viewing_original": "You are viewing the original content",
-  "original": "Original"
+  "original": "Original",
+  "unavailable": "No {language} translation is available. Showing the original in {sourceLanguage}.",
+  "available_languages": "Article languages"
 }

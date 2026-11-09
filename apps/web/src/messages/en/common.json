@@ -248,5 +248,6 @@
 
   "error_boundary_block_title": "Something went wrong",
   "error_boundary_block_subtitle": "Please try refreshing the page",
-  "error_boundary_inline_text": "Failed to render component"
+  "error_boundary_inline_text": "Failed to render component",
+  "site_language": "Site language"
 }
