@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { locales } from '~/i18n/config'
@@ -17,13 +16,13 @@ export const LocaleSwitcher = () => {
       aria-label={t('site_language')}
       className="flex flex-wrap items-center gap-3 text-sm"
     >
+      {/* A new document starts at the top; client routing can preserve the footer. */}
       {locales.map((language) => (
-        <Link
+        <a
           key={language}
           href={buildLocalePrefixedPath(language, pathname)}
           hrefLang={language}
           lang={language}
-          prefetch={false}
           aria-current={language === locale ? 'true' : undefined}
           className={
             language === locale
@@ -32,7 +31,7 @@ export const LocaleSwitcher = () => {
           }
         >
           {t(`locale_${language}`)}
-        </Link>
+        </a>
       ))}
     </nav>
   )

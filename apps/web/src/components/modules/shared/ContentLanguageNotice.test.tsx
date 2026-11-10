@@ -46,7 +46,7 @@ describe('crawlable language links and translation status', () => {
     expect(html).not.toContain('href="/zh/')
   })
 
-  it('explains the fallback and links only to the existing original', async () => {
+  it('explains the fallback without repeating the language selector', async () => {
     const html = renderToStaticMarkup(
       await ContentLanguageNotice({
         content: { isTranslated: false },
@@ -55,8 +55,8 @@ describe('crawlable language links and translation status', () => {
       }),
     )
     expect(html).toContain('訳はありません')
-    expect(html).toContain(`href="${pathname}"`)
-    expect(html).not.toContain('href="/ja/')
+    expect(html).not.toContain('<nav')
+    expect(html).not.toContain('<aside')
   })
 
   it('labels AI translations and exposes an original link', async () => {
@@ -73,7 +73,9 @@ describe('crawlable language links and translation status', () => {
     )
     expect(html).toContain('AI翻訳')
     expect(html).toContain(`href="${pathname}"`)
-    expect(html).toContain(`href="/ja${pathname}"`)
+    expect(html).not.toContain(`href="/ja${pathname}"`)
+    expect(html).not.toContain('<aside')
+    expect(html).not.toContain('<nav')
     expect(html).not.toContain('href="/en/')
   })
 
@@ -88,6 +90,16 @@ describe('crawlable language links and translation status', () => {
     )
     expect(html).toContain('原文を表示')
     expect(html).not.toContain('訳はありません')
+  })
+
+  it('keeps the original quiet even when translations are available', async () => {
+    expect(
+      await ContentLanguageNotice({
+        content: { isTranslated: false, availableTranslations: ['en', 'ja'] },
+        pathname,
+        locale: 'zh',
+      }),
+    ).toBeNull()
   })
 
   it('keeps original-only content quiet in its own language', async () => {

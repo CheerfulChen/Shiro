@@ -20,63 +20,40 @@ export async function ContentLanguageNotice({
   locale: string
   requestedLanguage?: string
 }) {
-  const { sourceLocale, contentLocale, supportedLocales } =
-    getContentLanguages(content)
-  const t = await getTranslations({ locale, namespace: 'translation' })
-  const common = await getTranslations({ locale, namespace: 'common' })
-  const languageLabel = (language: Locale) => common(`language_${language}`)
+  const { sourceLocale, contentLocale } = getContentLanguages(content)
   const requestedLocale =
     normalizeLocale(requestedLanguage) ?? normalizeLocale(locale)
   const viewingOriginal = requestedLanguage === 'original'
   const isFallback = !viewingOriginal && requestedLocale !== contentLocale
 
-  if (
-    !content.isTranslated &&
-    !isFallback &&
-    !viewingOriginal &&
-    supportedLocales.length <= 1
-  )
-    return null
+  if (!content.isTranslated && !isFallback && !viewingOriginal) return null
+
+  const t = await getTranslations({ locale, namespace: 'translation' })
+  const common = await getTranslations({ locale, namespace: 'common' })
+  const languageLabel = (language: Locale) => common(`language_${language}`)
 
   return (
-    <aside className="my-4 rounded-lg border border-neutral/15 bg-neutral/5 px-4 py-3 text-sm">
-      {content.isTranslated ? (
-        <p>
-          <span className="font-medium">{t('banner_title')}</span>
-          {' · '}
-          {t('banner_translatedFrom', {
-            language: languageLabel(sourceLocale),
-          })}
-        </p>
-      ) : isFallback ? (
-        <p>
-          {t('unavailable', {
-            language: languageLabel(requestedLocale ?? sourceLocale),
-            sourceLanguage: languageLabel(sourceLocale),
-          })}
-        </p>
-      ) : viewingOriginal ? (
-        <p>{t('viewing_original')}</p>
-      ) : null}
-      <nav
-        aria-label={t('available_languages')}
-        className="mt-2 flex flex-wrap gap-x-4 gap-y-2"
-      >
-        {supportedLocales.map((language) => (
-          <Link
-            key={language}
-            href={buildLocalePrefixedPath(language, pathname)}
-            hrefLang={language}
-            lang={language}
-            prefetch={false}
-            aria-current={language === contentLocale ? 'page' : undefined}
-            className="text-accent underline-offset-4 hover:underline"
-          >
-            {languageLabel(language)}
-            {language === sourceLocale && <span> ({t('original')})</span>}
-          </Link>
-        ))}
-      </nav>
-    </aside>
+    <p className="my-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral/60">
+      <span>
+        {content.isTranslated
+          ? `${t('banner_title')} · ${t('banner_translatedFrom', { language: languageLabel(sourceLocale) })}`
+          : isFallback
+            ? t('unavailable', {
+                language: languageLabel(requestedLocale ?? sourceLocale),
+                sourceLanguage: languageLabel(sourceLocale),
+              })
+            : t('viewing_original')}
+      </span>
+      {content.isTranslated && (
+        <Link
+          href={buildLocalePrefixedPath(sourceLocale, pathname)}
+          hrefLang={sourceLocale}
+          prefetch={false}
+          className="underline underline-offset-4 transition-colors hover:text-accent"
+        >
+          {t('banner_viewOriginal')}
+        </Link>
+      )}
+    </p>
   )
 }
